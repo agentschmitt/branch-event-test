@@ -1,9 +1,18 @@
 name: cicd
 on:
   push:
+  create:
   workflow_dispatch:
 
 jobs:
+  branch:
+    name: branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+    - run: |
+        echo ${GITHUB_REF}
+
   app1:
     name: app1
     runs-on: ubuntu-latest
