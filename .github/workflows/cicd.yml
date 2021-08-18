@@ -5,16 +5,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  branch:
-    name: branch
+  changes:
+    name: changes
     runs-on: ubuntu-latest
     timeout-minutes: 1
+    outputs:
+      app1_changed: ${{ steps.app1_changed.outputs.changed }}
+      app2_changed: ${{ steps.app2_changed.outputs.changed }}
     steps:
-    - run: |
-        echo ${GITHUB_REF}
+    - uses: actions/checkout@v2
+      with:
+        # This way "marceloprado/has-changed-path@v1" can detect changes in up to 50 commits per push
+        fetch-depth: 50
+    - uses: marceloprado/has-changed-path@v1
+      id: app1_changed
+      with:
+       paths: app1
+    - uses: marceloprado/has-changed-path@v1
+      id: app2_changed
+      with:
+       paths: app2
 
   app1:
     name: app1
+    needs: [changes]
+    if: needs.changes.outputs.app1_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
@@ -23,6 +38,8 @@ jobs:
 
   app2:
     name: app2
+    needs: [changes]
+    if: needs.changes.outputs.app2_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
