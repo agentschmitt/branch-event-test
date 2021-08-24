@@ -26,7 +26,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         workflow: cicd.yml
-        branch: ${{ steps.branch.outputs.branch }}
+        branch: ${{ steps.branch.outputs.current_branch }}
     -  name: workflow info
        run: |
         echo ${{ steps.workflow.outputs.conclusion }}
