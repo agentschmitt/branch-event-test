@@ -17,14 +17,16 @@ jobs:
       with:
         # This way "marceloprado/has-changed-path@v1" can detect changes in up to 50 commits per push
         fetch-depth: 50
+    - uses: tj-actions/branch-names@v4.9
+      id: branch
     - name: branch info
-      run: echo ${{ github.ref }}
+      run: echo ${{ steps.branch.outputs.current_branch }}
     - uses: LASER-Yi/workflow-status@v0.0.2
       id: workflow
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         workflow: cicd.yml
-        branch: ${{ github.ref }}
+        branch: ${{ steps.branch.outputs.current_branch }}
     -  name: workflow info
        run: |
         echo ${{ steps.workflow.outputs.conclusion }}
