@@ -5,44 +5,28 @@ on:
 
 jobs:
   changes:
-    name: changes
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    # Set job outputs to values from filter step
     outputs:
-      app1_changed: ${{ steps.app1_changed.outputs.changed }}
-      app2_changed: ${{ steps.app2_changed.outputs.changed }}
+      app1: ${{ steps.filter.outputs.app1 }}
+      app2: ${{ steps.filter.outputs.app2 }}
     steps:
+    # For pull requests it's not necessary to checkout the code
     - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
       with:
-        # This way "marceloprado/has-changed-path@v1" can detect changes in up to 50 commits per push
-        fetch-depth: 50
-    - uses: tj-actions/branch-names@v4.9
-      id: branch
-    - name: branch info
-      run: echo ${{ steps.branch.outputs.current_branch }}
-    - uses: LASER-Yi/workflow-status@v0.0.2
-      id: workflow
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        workflow: cicd.yml
-        branch: ${{ steps.branch.outputs.current_branch }}
-    -  name: workflow info
-       run: |
-        echo ${{ steps.workflow.outputs.conclusion }}
-        echo ${{ steps.workflow.outputs.status }}        
-    - uses: marceloprado/has-changed-path@v1
-      id: app1_changed
-      with:
-       paths: app1
-    - uses: marceloprado/has-changed-path@v1
-      id: app2_changed
-      with:
-       paths: app2
+        base: ${{ github.ref }}
+        filters: |
+          app1:
+            - 'app1/**'
+          app2:
+            - 'app2/**'
 
   app1:
     name: app1
     needs: [changes]
-    if: needs.changes.outputs.app1_changed == 'true'
+    if: needs.changes.outputs.app1 == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
@@ -52,7 +36,7 @@ jobs:
   app2:
     name: app2
     needs: [changes]
-    if: needs.changes.outputs.app2_changed == 'true'
+    if: needs.changes.outputs.app2 == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
